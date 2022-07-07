@@ -47,27 +47,30 @@ arguments."
 	   (>= y 0) (< y (world-length world)))
       (aref world x y) nil))
 
+(defun active-neighbors (world x y)
+  "Traverses the neighbors around a position and returns the count of active neighbors in the provided generation."
+  (let ((neighbor-count 0))
+    (loop for i from -1 to 1 do
+      (loop for j from -1 to 1 do
+        ; If the traversed cell is active and is not the position, it is a neighbor
+        (if (and (eql (access-world world (+ x i) (+ y j)) 1)
+                 (not (and (eql (+ x i) x) (eql (+ y j) y))))
+            (incf neighbor-count))))
+    neighbor-count))
+
 (defun update (world snapshot x y)
   "Main update logic for a given position at (x, y). Will use snapshot copy to compare and update via world."
   (let* ((pos (access-world snapshot x y))
-	 (left (access-world snapshot x (- y 1)))
-	 (right (access-world snapshot x (+ y 1)))
-	 (top (access-world snapshot (- x 1) y))
-	 (bottom (access-world snapshot (+ x 1) y))
-	 (top-left (access-world snapshot (- x 1) (- y 1)))
-	 (top-right (access-world snapshot (- x 1) (+ y 1)))
-	 (bottom-left (access-world snapshot (+ x 1) (- y 1)))
-	 (bottom-right (access-world snapshot (+ x 1) (+ y 1)))
-     ; Neighbors will only contain a list of 1's representing active neighbors.
-	 (neighbors (remove 0 (remove nil (list left right top bottom top-left top-right bottom-left bottom-right)))))
-        ; Main conditional check to determine if
+	 (neighbors (active-neighbors snapshot x y)))
+    ; Main conditional check to determine if current cell should be active or not in the next generation.
     (cond ((and (eql pos 1)
-		(or (eql (length neighbors) 2) (eql (length neighbors) 3)))
+		(or (eql neighbors 2) (eql neighbors 3)))
 	   (setf (aref world x y) 1))
-	  ((and (eql pos 0) (eql (length neighbors) 3))
+	  ((and (eql pos 0) (eql neighbors 3))
 	   (setf (aref world x y) 1))
 	  (t (setf (aref world x y) 0)))))
 
+;; Needs to provide update function one row at a time, where line buffer 1 contains updates for s
 (defun update-world (world)
   "Updates world by looping through each position and updating accordingly."
   (let ((size (- (world-length world) 1))
@@ -90,7 +93,7 @@ arguments."
     (update-world world)
     (sleep sleep-time)))
 
-(defun init-pos (world)
+(defun init-glider (world)
   ""
   (setf (aref world 0 1) 1)
   (setf (aref world 1 2) 1)
