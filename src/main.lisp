@@ -93,24 +93,36 @@ arguments."
     (update-world world)
     (sleep sleep-time)))
 
-(defun init-glider (world)
-  ""
+(defun init-glider-pattern (world)
+  "A basic glider that is placed at the beginning of the world."
   (setf (aref world 0 1) 1)
   (setf (aref world 1 2) 1)
   (setf (aref world 2 2) 1)
   (setf (aref world 2 1) 1)
   (setf (aref world 2 0) 1) t)
 
-(defun init-pos-2 (world)
-  ""
-  (setf (aref world 8 10) 1)
-  (setf (aref world 12 10) 1)
-  (setf (aref world 8 8) 1)
-  (setf (aref world 12 8) 1)
-  (setf (aref world 9 7) 1)
-  (setf (aref world 11 7) 1)
-  (setf (aref world 10 6) 1) t)
-  
+(defun init-c-pattern (world)
+  "A basic c shape that becomes an oscillator. World should be 20x20 at a minimum."
+  (let ((size (/ (world-length world) 2)))
+    (setf (aref world (- size 2) size) 1)
+    (setf (aref world (+ size 2) size) 1)
+    (setf (aref world (- size 2) (- size 2)) 1)
+    (setf (aref world (+ size 2) (- size 2)) 1)
+    (setf (aref world (- size 1) (- size 3)) 1)
+    (setf (aref world (+ size 1) (- size 3)) 1)
+    (setf (aref world size (- size 4)) 1) t))
+
+(defun init-random-pattern (world &optional (coverage-percentage 0.6))
+  "Initializes a square world with some random pattern."
+  (let* ((length (world-length world))
+        (marks (* (expt length 2) coverage-percentage)))
+    (if (not (eql length nil))
+        (progn
+          (loop for i from 0 to (- marks 1) do
+            (let ((x (random length))
+                  (y (random length)))
+              (setf (aref world x y) 1))) t) nil)))
+
 ; http://large.stanford.edu/diversions/life/rules/
 ; https://en.wikipedia.org/wiki/Conway's_Game_of_Life
 ;(defvar test-world (make-array '(20 20)))
