@@ -81,10 +81,8 @@ arguments."
 
 (defun clear-world (world)
   "Clears the provided world by setting all positions to zero."
-  (let ((size (world-length world)))
-    (dotimes (x size)
-      (dotimes (y size)
-        (setf (aref world x y) 0)))))
+    (dotimes (x (array-total-size world))
+      (setf (row-major-aref world x) 0)))
 
 (defun game-of-life (world &optional (max-generation 100) (sleep-time 0.2))
   "Main game of life loop which will print out each generation and update to the next generation."
