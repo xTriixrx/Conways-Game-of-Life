@@ -32,12 +32,12 @@ arguments."
 
 (defun print-world (world)
   "Will print the current instance of the world"
-  (let ((size (- (world-length world) 1)))
-    (loop for x from 0 to size do
-      (loop for y from 0 to size do
-	(if (eql (aref world x y) 1)
-	    (format t "* ")
-	    (format t "- ")))
+  (let ((size (world-length world)))
+    (dotimes (x size)
+      (dotimes (y size)
+        (if (eql (aref world x y) 1)
+            (format t "* ")
+            (format t "- ")))
       (format t "~%"))
     (format t "~%")))
 
@@ -50,11 +50,11 @@ arguments."
 (defun active-neighbors (world x y)
   "Traverses the neighbors around a position and returns the count of active neighbors in the provided generation."
   (let ((neighbor-count 0))
-    (loop for i from -1 to 1 do
-      (loop for j from -1 to 1 do
+    (dotimes (i 3)
+      (dotimes (j 3)
         ; If the traversed cell is active and is not the position, it is a neighbor
-        (if (and (eql (access-world world (+ x i) (+ y j)) 1)
-                 (not (and (eql (+ x i) x) (eql (+ y j) y))))
+        (if (and (eql (access-world world (+ x (- i 1)) (+ y (- j 1))) 1)
+                 (not (and (eql (+ x (- i 1)) x) (eql (+ y (- j 1)) y))))
             (incf neighbor-count))))
     neighbor-count))
 
@@ -73,22 +73,22 @@ arguments."
 ;; Needs to provide update function one row at a time, where line buffer 1 contains updates for s
 (defun update-world (world)
   "Updates world by looping through each position and updating accordingly."
-  (let ((size (- (world-length world) 1))
-	(snapshot (copy-array world)))
-    (loop for x from 0 to size do
-      (loop for y from 0 to size do
-	(update world snapshot x y)))))
+  (let ((size (world-length world))
+        (snapshot (copy-array world)))
+    (dotimes (x size)
+      (dotimes (y size)
+        (update world snapshot x y)))))
 
 (defun clear-world (world)
   "Clears the provided world by setting all positions to zero."
-  (let ((size (- (world-length world) 1)))
-    (loop for x from 0 to size do
-      (loop for y from 0 to size do
-	(setf (aref world x y) 0)))))
+  (let ((size (world-length world)))
+    (dotimes (x size)
+      (dotimes (y size)
+        (setf (aref world x y) 0)))))
 
 (defun game-of-life (world &optional (max-generation 100) (sleep-time 0.2))
   "Main game of life loop which will print out each generation and update to the next generation."
-  (loop for x from 0 to max-generation do
+  (dotimes (x max-generation)
     (print-world world)
     (update-world world)
     (sleep sleep-time)))
@@ -115,10 +115,10 @@ arguments."
 (defun init-random-pattern (world &optional (coverage-percentage 0.6))
   "Initializes a square world with some random pattern."
   (let* ((length (world-length world))
-        (marks (* (expt length 2) coverage-percentage)))
+        (marks (round (* (expt length 2) coverage-percentage))))
     (if (not (eql length nil))
         (progn
-          (loop for i from 0 to (- marks 1) do
+          (dotimes (i marks)
             (let ((x (random length))
                   (y (random length)))
               (setf (aref world x y) 1))) t) nil)))
