@@ -31,6 +31,7 @@ arguments."
   (if (square-p world) (car (array-dimensions world)) nil))
 
 (defun print-world (world)
+  "Prints the world using row major indexing."
   (let ((row-count 0)
         (length (world-length world)))
     (dotimes (pos (array-total-size world))
@@ -47,19 +48,15 @@ arguments."
   (if (and (>= pos 0) (< pos (array-total-size world)))
       (row-major-aref world pos) nil))
 
-;; Need to clean up this rewrite
 (defun active-neighbors (world pos)
-  "Traverses the neighbors around a position and returns the count of active neighbors in the provided generation."
-  (let* ((down (row-access-world world (+ pos (world-length world))))
-         (up (row-access-world world (+ pos (- (world-length world)))))
-         (left (row-access-world world (- pos 1)))
-         (right (row-access-world world (+ pos 1)))
-         (top-left (row-access-world world (+ pos (- (world-length world)) (- 1))))
-         (top-right (row-access-world world (+ pos (- (world-length world)) 1)))
-         (bottom-left (row-access-world world (+ pos (world-length world) (- 1))))
-         (bottom-right (row-access-world world (+ pos (world-length world) 1)))
-         (neighbors (remove 0 (remove nil (list up down left right top-left top-right bottom-left bottom-right))))
-         (neighbor-count (length neighbors)))
+  "Calculates and returns the number of active neighbor cell's to the given position."
+  (let ((neighbor-count 0)
+        (row-length (world-length world)))
+    (dotimes (i 3)
+      (dotimes (j 3)
+        (if (and (not (and (eql j 1) (eql i 1)))
+                 (eql (row-access-world world (+ pos (* row-length (- i 1)) (- j 1))) 1))
+            (incf neighbor-count))))
     neighbor-count))
 
 (defun update (world snapshot pos)
