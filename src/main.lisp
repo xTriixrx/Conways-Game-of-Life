@@ -31,58 +31,60 @@ arguments."
   (if (square-p world) (car (array-dimensions world)) nil))
 
 (defun print-world (world)
-  "Will print the current instance of the world"
-  (let ((size (world-length world)))
-    (dotimes (x size)
-      (dotimes (y size)
-        (if (eql (aref world x y) 1)
-            (format t "* ")
-            (format t "- ")))
-      (format t "~%"))
+  (let ((row-count 0)
+        (length (world-length world)))
+    (dotimes (pos (array-total-size world))
+      (if (eql (row-major-aref world pos) 1)
+          (format t "* ")
+          (format t "- "))
+      (if (eql row-count (- length 1))
+          (progn (format t "~%") (setf row-count 0))
+          (incf row-count)))
     (format t "~%")))
 
-(defun access-world (world x y)
-  "Safe access world, returns nil if out of bounds"
-  (if (and (>= x 0) (< x (world-length world))
-	   (>= y 0) (< y (world-length world)))
-      (aref world x y) nil))
+(defun row-access-world (world pos)
+  "Safe access world using row-major-aref for single position, returns nil if out of bounds"
+  (if (and (>= pos 0) (< pos (array-total-size world)))
+      (row-major-aref world pos) nil))
 
-(defun active-neighbors (world x y)
+;; Need to clean up this rewrite
+(defun active-neighbors (world pos)
   "Traverses the neighbors around a position and returns the count of active neighbors in the provided generation."
-  (let ((neighbor-count 0))
-    (dotimes (i 3)
-      (dotimes (j 3)
-        ; If the traversed cell is active and is not the position, it is a neighbor
-        (if (and (eql (access-world world (+ x (- i 1)) (+ y (- j 1))) 1)
-                 (not (and (eql (+ x (- i 1)) x) (eql (+ y (- j 1)) y))))
-            (incf neighbor-count))))
+  (let* ((down (row-access-world world (+ pos (world-length world))))
+         (up (row-access-world world (+ pos (- (world-length world)))))
+         (left (row-access-world world (- pos 1)))
+         (right (row-access-world world (+ pos 1)))
+         (top-left (row-access-world world (+ pos (- (world-length world)) (- 1))))
+         (top-right (row-access-world world (+ pos (- (world-length world)) 1)))
+         (bottom-left (row-access-world world (+ pos (world-length world) (- 1))))
+         (bottom-right (row-access-world world (+ pos (world-length world) 1)))
+         (neighbors (remove 0 (remove nil (list up down left right top-left top-right bottom-left bottom-right))))
+         (neighbor-count (length neighbors)))
     neighbor-count))
 
-(defun update (world snapshot x y)
-  "Main update logic for a given position at (x, y). Will use snapshot copy to compare and update via world."
-  (let* ((pos (access-world snapshot x y))
-	 (neighbors (active-neighbors snapshot x y)))
+(defun update (world snapshot pos)
+  "Main update logic for a given position. Will use snapshot copy to compare and update via world."
+  (let* ((prev-val (row-major-aref snapshot pos))
+         (neighbors (active-neighbors snapshot pos)))
     ; Main conditional check to determine if current cell should be active or not in the next generation.
-    (cond ((and (eql pos 1)
-		(or (eql neighbors 2) (eql neighbors 3)))
-	   (setf (aref world x y) 1))
-	  ((and (eql pos 0) (eql neighbors 3))
-	   (setf (aref world x y) 1))
-	  (t (setf (aref world x y) 0)))))
+    (cond ((and (eql prev-val 1)
+                (or (eql neighbors 2) (eql neighbors 3)))
+           (setf (row-major-aref world pos) 1))
+          ((and (eql prev-val 0) (eql neighbors 3))
+           (setf (row-major-aref world pos) 1))
+          (t (setf (row-major-aref world pos) 0)))))
 
 ;; Needs to provide update function one row at a time, where line buffer 1 contains updates for s
 (defun update-world (world)
   "Updates world by looping through each position and updating accordingly."
-  (let ((size (world-length world))
-        (snapshot (copy-array world)))
-    (dotimes (x size)
-      (dotimes (y size)
-        (update world snapshot x y)))))
+  (let ((snapshot (copy-array world)))
+    (dotimes (pos (array-total-size world))
+      (update world snapshot pos))))
 
 (defun clear-world (world)
   "Clears the provided world by setting all positions to zero."
-    (dotimes (x (array-total-size world))
-      (setf (row-major-aref world x) 0)))
+    (dotimes (pos (array-total-size world))
+      (setf (row-major-aref world pos) 0)))
 
 (defun game-of-life (world &optional (max-generation 100) (sleep-time 0.2))
   "Main game of life loop which will print out each generation and update to the next generation."
