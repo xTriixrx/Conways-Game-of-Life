@@ -1,6 +1,9 @@
 (defpackage conways-game-of-life
   (:use :cl)
-  (:export #:world-equal #:game-of-life #:init-glider-pattern))
+  (:export #:copy-array #:square-p #:world-length #:world-equal
+	   #:print-world #:row-access-world #:active-neighbors
+	   #:update #:update-world #:clear-world #:game-of-life
+	   #:init-glider-pattern #:init-c-pattern #:init-random-pattern))
 (in-package :conways-game-of-life)
 
 (defun copy-array (array &key
@@ -23,9 +26,11 @@ arguments."
 
 (defun square-p (world)
   "Predicate for determining if array is square"
-  (let ((dimensions (array-dimensions world)))
-    (and (eql (length dimensions) 2)
-	 (eql (car dimensions) (cadr dimensions)))))
+  (if (arrayp world)
+      (let ((dimensions (array-dimensions world)))
+	(and (eql (length dimensions) 2)
+	     (eql (car dimensions) (cadr dimensions))))
+      nil))
 
 (defun world-length (world)
   "Returns the length of the world if it is square, otherwise returns nil"
@@ -97,10 +102,11 @@ arguments."
     (dotimes (pos (array-total-size world))
       (setf (row-major-aref world pos) 0)))
 
-(defun game-of-life (world &optional (max-generation 100) (sleep-time 0.2))
+(defun game-of-life (world &optional (max-generation 100) (sleep-time 0.2) (print-generation t))
   "Main game of life loop which will print out each generation and update to the next generation."
   (dotimes (x max-generation)
-    (print-world world)
+    (if print-generation
+	(print-world world))
     (update-world world)
     (sleep sleep-time)))
 
