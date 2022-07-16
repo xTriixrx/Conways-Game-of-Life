@@ -1,5 +1,6 @@
 (defpackage conways-game-of-life
-  (:use :cl))
+  (:use :cl)
+  (:export #:world-equal #:game-of-life #:init-glider-pattern))
 (in-package :conways-game-of-life)
 
 (defun copy-array (array &key
@@ -29,6 +30,19 @@ arguments."
 (defun world-length (world)
   "Returns the length of the world if it is square, otherwise returns nil"
   (if (square-p world) (car (array-dimensions world)) nil))
+
+(defun world-equal (world1 world2)
+  "Returns whether the 2 worlds are equal or not."
+  (let ((is-equal t)
+	(world-size-1 (array-total-size world1))
+	(world-size-2 (array-total-size world2)))
+    (if (eql world-size-1 world-size-2)
+	(dotimes (i world-size-1)
+	  (if (not (eql (row-major-aref world1 i)
+			(row-major-aref world2 i)))
+	      (setf is-equal nil)))
+	nil)
+    is-equal))
 
 (defun print-world (world)
   "Prints the world using row major indexing."
