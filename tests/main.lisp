@@ -17,7 +17,18 @@
       (ok (square-p valid-world))
       (ng (square-p invalid-world)))))
 
-(deftest test-glider-gen-1
+(deftest test-neighbors
+  (testing "Testing the computation of determining active neighbor cells"
+    (let ((test-world (make-array '(10 10) :element-type 'bit)))
+      (init-glider-pattern test-world)
+      (ok (eql (active-neighbors test-world 0) 1))
+      (ok (eql (active-neighbors test-world 1) 1))
+      (ok (eql (active-neighbors test-world 10) 3))
+      (ok (eql (active-neighbors test-world 11) 5))
+      (ok (eql (active-neighbors test-world 12) 3))
+      (ok (eql (active-neighbors test-world 31) 3)))))
+
+(deftest test-glider
   (testing "Testing of glider pattern for first generation."
     (let ((actual-world (make-array '(10 10) :element-type 'bit))
 	  (expected-world (make-array '(10 10) :element-type 'bit)))
