@@ -1,6 +1,6 @@
 (defpackage conways-game-of-life/tests/main
   (:use :cl
-	:rove
+        :rove
         :conways-game-of-life))
 (in-package :conways-game-of-life/tests/main)
 
@@ -28,6 +28,36 @@
       (ok (eql (world-length valid-world) 10))
       (ok (eql (world-length invalid-world) nil)))))
 
+(deftest test-copy-world-row
+  (testing "Testing copy-world-row function"
+    (let ((nil-world nil)
+          (flat-world (make-array 10 :element-type 'bit))
+          (expected-row (make-array 10 :element-type 'bit))
+          (valid-world (make-array '(10 10) :element-type 'bit))
+          (invalid-world (make-array '(10 2) :element-type 'bit)))
+      ; Set up valid-world to have x number of active cells for x rows
+      (dotimes (i 10)
+        (dotimes (j 10)
+          (if (<= j i)
+              (set-world valid-world (+ j (* i 10)) 1))))
+      (ok (eql (copy-world-row nil-world) nil))
+      (ok (eql (copy-world-row flat-world) nil))
+      (ok (eql (copy-world-row invalid-world) nil))
+      (dotimes (i 10)
+        (setf expected-row (copy-world-row valid-world i))
+        (ok (row-equal valid-world expected-row i))))))
+
+(deftest test-insert-row
+  (testing "Testing insert-row function"
+    (let ((row (make-array 10 :element-type 'bit))
+          (world (make-array '(10 10) :element-type 'bit)))
+      (dotimes (i 10)
+        (setf (aref row i) 1))
+      (insert-row world row 0)
+      (insert-row world row 1)
+      (ok (row-equal world row 0))
+      (ok (row-equal world row 1)))))
+
 (deftest test-world-equal
   (testing "Testing world equal function"
     (let ((nil-world nil)
@@ -43,19 +73,19 @@
       (ng (world-equal invalid-world valid-world))
       (ng (world-equal valid-world invalid-world)))))
 
-(deftest test-row-access-world
-  (testing "Testing row access world function"
+(deftest test-access-world
+  (testing "Testing access world function"
     (let ((nil-world nil)
 	  (flat-world (make-array 10 :element-type 'bit))
 	  (valid-world (make-array '(10 10) :element-type 'bit))
 	  (invalid-world (make-array '(10 2) :element-type 'bit)))
-      (setf (row-major-aref valid-world 0) 1)
-      (ng (row-access-world nil-world 0))
-      (ng (row-access-world flat-world 0))
-      (ng (row-access-world valid-world -1))
-      (ng (row-access-world invalid-world 0))
-      (ng (row-access-world valid-world 100))
-      (ok (eql (row-access-world valid-world 0) 1)))))
+      (set-world valid-world 0 1)
+      (ng (access-world nil-world 0))
+      (ng (access-world flat-world 0))
+      (ng (access-world valid-world -1))
+      (ng (access-world invalid-world 0))
+      (ng (access-world valid-world 100))
+      (ok (eql (access-world valid-world 0) 1)))))
 
 (deftest test-neighbors
   (testing "Testing the computation of determining active neighbor cells"
@@ -72,11 +102,11 @@
   (testing "Testing of glider pattern for first generation."
     (let ((actual-world (make-array '(10 10) :element-type 'bit))
 	  (expected-world (make-array '(10 10) :element-type 'bit)))
-      (setf (row-major-aref expected-world 10) 1)
-      (setf (row-major-aref expected-world 12) 1)
-      (setf (row-major-aref expected-world 21) 1)
-      (setf (row-major-aref expected-world 22) 1)
-      (setf (row-major-aref expected-world 31) 1)
+      (set-world expected-world 10 1)
+      (set-world expected-world 12 1)
+      (set-world expected-world 21 1)
+      (set-world expected-world 22 1)
+      (set-world expected-world 31 1)
       (init-glider-pattern actual-world)
       (game-of-life actual-world 1 0 nil)
       (ok (world-equal actual-world expected-world)))))
