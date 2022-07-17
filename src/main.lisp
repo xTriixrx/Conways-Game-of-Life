@@ -38,16 +38,18 @@ arguments."
 
 (defun world-equal (world1 world2)
   "Returns whether the 2 worlds are equal or not."
-  (let ((is-equal t)
-	(world-size-1 (array-total-size world1))
-	(world-size-2 (array-total-size world2)))
-    (if (eql world-size-1 world-size-2)
-	(dotimes (i world-size-1)
-	  (if (not (eql (row-major-aref world1 i)
-			(row-major-aref world2 i)))
-	      (setf is-equal nil)))
-	nil)
-    is-equal))
+  (if (and (square-p world1) (square-p world2))
+      (let ((is-equal t)
+	    (world-size-1 (array-total-size world1))
+	    (world-size-2 (array-total-size world2)))
+	(if (eql world-size-1 world-size-2)
+	    (dotimes (i world-size-1)
+	      (if (not (eql (row-major-aref world1 i)
+			    (row-major-aref world2 i)))
+		  (setf is-equal nil)))
+	    nil)
+	is-equal)
+      nil))
 
 (defun print-world (world)
   "Prints the world using row major indexing."
@@ -64,7 +66,7 @@ arguments."
 
 (defun row-access-world (world pos)
   "Safe access world using row-major-aref for single position, returns nil if out of bounds"
-  (if (and (>= pos 0) (< pos (array-total-size world)))
+  (if (and (square-p world) (>= pos 0) (< pos (array-total-size world)))
       (row-major-aref world pos) nil))
 
 (defun active-neighbors (world pos)
