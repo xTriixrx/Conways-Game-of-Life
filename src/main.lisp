@@ -1,9 +1,10 @@
 (defpackage conways-game-of-life
-  (:use :cl)
+  (:use :cl
+        :cl-progress-bar)
   (:export #:square-p #:world-length #:access-world
      #:set-world #:copy-world-row #:insert-row #:row-equal
      #:insert-row #:world-equal #:print-world #:active-neighbors
-     #:update #:update-world #:clear-world #:game-of-life
+     #:update-position #:update-world #:clear-world #:game-of-life
      #:init-glider-pattern #:init-c-pattern #:init-random-pattern))
 (in-package :conways-game-of-life)
 
@@ -118,7 +119,7 @@
             (incf neighbor-count))))
     neighbor-count))
 
-(defun update (world update-buffer pos buffer-pos)
+(defun update-position (world update-buffer pos buffer-pos)
   "Main update logic for a given position. Will use snapshot copy to compare and update via world."
   (let ((prev-val (access-world world pos))
          (neighbors (active-neighbors world pos)))
@@ -147,8 +148,8 @@
                (buffer-pos (- pos (* row-delta length))))
           ; If an even row, use the first line buffer, otherwise use the second line buffer
           (if (eql (mod row-delta 2) 0)
-              (update world lbuffer1 pos buffer-pos)
-              (update world lbuffer2 pos buffer-pos))
+              (update-position world lbuffer1 pos buffer-pos)
+              (update-position world lbuffer2 pos buffer-pos))
           ; If the current row is greater than the first row and the buffer position matches the end row position
           (if (and (>= row-delta 1)
                    (eql buffer-pos end-of-row))
@@ -171,11 +172,16 @@
 
 (defun game-of-life (world &optional (max-generation 100) (sleep-time 0.2) (print-generation t))
   "Main game of life loop which will print out each generation and update to the next generation."
-  (dotimes (x max-generation)
-    (if print-generation
-	(print-world world))
-    (update-world world)
-    (sleep sleep-time)))
+  (setf cl-progress-bar:*progress-bar-enabled* t)
+  (let ((length (world-length world)))
+    (cl-progress-bar:with-progress-bar
+        (max-generation "Performing Game of Life on ~ax~a world for ~a generations." length length max-generation)
+      (dotimes (generation max-generation)
+        (if print-generation
+            (print-world world))
+        (update-world world)
+        (sleep sleep-time)
+        (cl-progress-bar:update 1)))))
 
 (defun init-glider-pattern (world)
   "A basic glider that is placed at the beginning of the world."

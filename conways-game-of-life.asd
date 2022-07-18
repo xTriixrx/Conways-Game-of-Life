@@ -2,7 +2,7 @@
   :version "0.1.0"
   :author "Vincent Nigro"
   :license ""
-  :depends-on ()
+  :depends-on ("cl-progress-bar")
   :components ((:module "src"
                 :components
                 ((:file "main"))))
