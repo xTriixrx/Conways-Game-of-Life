@@ -1,29 +1,11 @@
 (defpackage conways-game-of-life
   (:use :cl)
-  (:export #:copy-array #:square-p #:world-length #:access-world
+  (:export #:square-p #:world-length #:access-world
      #:set-world #:copy-world-row #:insert-row #:row-equal
      #:insert-row #:world-equal #:print-world #:active-neighbors
-	   #:update #:update-world #:clear-world #:game-of-life
-	   #:init-glider-pattern #:init-c-pattern #:init-random-pattern))
+     #:update #:update-world #:clear-world #:game-of-life
+     #:init-glider-pattern #:init-c-pattern #:init-random-pattern))
 (in-package :conways-game-of-life)
-
-(defun copy-array (array &key
-                   (element-type (array-element-type array))
-                   (fill-pointer (and (array-has-fill-pointer-p array)
-                                      (fill-pointer array)))
-                   (adjustable (adjustable-array-p array)))
-  "Returns an undisplaced copy of ARRAY, with same fill-pointer and
-adjustability (if any) as the original, unless overridden by the keyword
-arguments."
-  (let* ((dimensions (array-dimensions array))
-         (new-array (make-array dimensions
-                                :element-type element-type
-                                :adjustable adjustable
-                                :fill-pointer fill-pointer)))
-    (dotimes (i (array-total-size array))
-      (setf (row-major-aref new-array i)
-            (row-major-aref array i)))
-    new-array))
 
 (defun square-p (world)
   "Predicate for determining if array is square"
@@ -84,6 +66,19 @@ arguments."
         t)
       nil))
 
+(defun row-empty-p (row)
+  "Predicate function for whether the provided row is empty or not"
+  (let ((is-empty t))
+    (dotimes (i (array-total-size row))
+      (if (not (eql (aref row i) 0))
+          (setf is-empty nil)))
+    is-empty))
+
+(defun clear-row (row)
+  "Clears the provided row array by setting all positions to zero."
+  (dotimes (i (array-total-size row))
+    (setf (aref row i) 0)))
+
 (defun world-equal (world1 world2)
   "Returns whether the 2 worlds are equal or not."
   (if (and (square-p world1) (square-p world2))
@@ -123,24 +118,49 @@ arguments."
             (incf neighbor-count))))
     neighbor-count))
 
-(defun update (world snapshot pos)
+(defun update (world update-buffer pos buffer-pos)
   "Main update logic for a given position. Will use snapshot copy to compare and update via world."
-  (let* ((prev-val (access-world snapshot pos))
-         (neighbors (active-neighbors snapshot pos)))
+  (let ((prev-val (access-world world pos))
+         (neighbors (active-neighbors world pos)))
     ; Main conditional check to determine if current cell should be active or not in the next generation.
     (cond ((and (eql prev-val 1)
                 (or (eql neighbors 2) (eql neighbors 3)))
-           (set-world world pos 1))
+           (setf (aref update-buffer buffer-pos) 1))
           ((and (eql prev-val 0) (eql neighbors 3))
-           (set-world world pos 1))
-          (t (set-world world pos 0)))))
+           (setf (aref update-buffer buffer-pos) 1))
+          (t (setf (aref update-buffer buffer-pos) 0)))))
 
-;; Needs to provide update function one row at a time, where line buffer 1 contains updates for s
 (defun update-world (world)
-  "Updates world by looping through each position and updating accordingly."
-  (let ((snapshot (copy-array world)))
-    (dotimes (pos (array-total-size world))
-      (update world snapshot pos))))
+  "Updates world by looping through each position and updating a line buffer accordingly."
+  (let* ((length (world-length world))
+         (end-of-row (- length 1))
+         (lbuffer1 (make-array length))
+         (lbuffer2 (make-array length)))
+    ; Create a local function binding to insert a buffer into a row of the provided world.
+    (labels
+        ((insert-and-clear (world buffer delta)
+           (insert-row world buffer delta)
+           (clear-row buffer)))
+      ; Iterate through each position in the world and update a line buffer until the end of the line is reached
+      (dotimes (pos (array-total-size world))
+        (let* ((row-delta (floor (/ pos length)))
+               (buffer-pos (- pos (* row-delta length))))
+          ; If an even row, use the first line buffer, otherwise use the second line buffer
+          (if (eql (mod row-delta 2) 0)
+              (update world lbuffer1 pos buffer-pos)
+              (update world lbuffer2 pos buffer-pos))
+          ; If the current row is greater than the first row and the buffer position matches the end row position
+          (if (and (>= row-delta 1)
+                   (eql buffer-pos end-of-row))
+              ; If the current row is even, then the first line buffer was populated; inserts latest buffer into
+              ; the previous row in the world
+              (if (eql (mod row-delta 2) 0)
+                  (insert-and-clear world lbuffer2 (- row-delta 1))
+                  (insert-and-clear world lbuffer1 (- row-delta 1)))))))
+    ; For the last buffer, if the first buffer is not empty it contains the last update, otherwise the second.
+    (if (not (row-empty-p lbuffer1))
+        (insert-row world lbuffer1 end-of-row)
+        (insert-row world lbuffer2 end-of-row))))
 
 (defun clear-world (world)
   "Clears the provided world by setting all positions to zero."

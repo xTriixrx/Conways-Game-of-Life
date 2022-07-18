@@ -9,9 +9,9 @@
 (deftest test-square-p
   (testing "Testing square-p predicate function."
     (let ((nil-world nil)
-	  (flat-world (make-array '10 :element-type 'bit))
-	  (valid-world (make-array '(10 10) :element-type 'bit))
-	  (invalid-world (make-array '(10 2) :element-type 'bit)))
+          (flat-world (make-array '10 :element-type 'bit))
+          (valid-world (make-array '(10 10) :element-type 'bit))
+          (invalid-world (make-array '(10 2) :element-type 'bit)))
       (ng (square-p nil-world))
       (ng (square-p flat-world))
       (ok (square-p valid-world))
@@ -20,9 +20,9 @@
 (deftest test-world-length
   (testing "Testing world length function"
     (let ((nil-world nil)
-	  (flat-world (make-array 10 :element-type 'bit))
-	  (valid-world (make-array '(10 10) :element-type 'bit))
-	  (invalid-world (make-array '(10 2) :element-type 'bit)))
+          (flat-world (make-array 10 :element-type 'bit))
+          (valid-world (make-array '(10 10) :element-type 'bit))
+          (invalid-world (make-array '(10 2) :element-type 'bit)))
       (ok (eql (world-length nil-world) nil))
       (ok (eql (world-length flat-world) nil))
       (ok (eql (world-length valid-world) 10))
@@ -61,10 +61,10 @@
 (deftest test-world-equal
   (testing "Testing world equal function"
     (let ((nil-world nil)
-	  (flat-world (make-array 10 :element-type 'bit))
-	  (valid-world (make-array '(10 10) :element-type 'bit))
-	  (valid-world2 (make-array '(10 10) :element-type 'bit))
-	  (invalid-world (make-array '(10 2) :element-type 'bit)))
+          (flat-world (make-array 10 :element-type 'bit))
+          (valid-world (make-array '(10 10) :element-type 'bit))
+          (valid-world2 (make-array '(10 10) :element-type 'bit))
+          (invalid-world (make-array '(10 2) :element-type 'bit)))
       (init-glider-pattern valid-world)
       (init-glider-pattern valid-world2)
       (ng (world-equal nil-world flat-world))
@@ -76,9 +76,9 @@
 (deftest test-access-world
   (testing "Testing access world function"
     (let ((nil-world nil)
-	  (flat-world (make-array 10 :element-type 'bit))
-	  (valid-world (make-array '(10 10) :element-type 'bit))
-	  (invalid-world (make-array '(10 2) :element-type 'bit)))
+          (flat-world (make-array 10 :element-type 'bit))
+          (valid-world (make-array '(10 10) :element-type 'bit))
+          (invalid-world (make-array '(10 2) :element-type 'bit)))
       (set-world valid-world 0 1)
       (ng (access-world nil-world 0))
       (ng (access-world flat-world 0))
@@ -99,9 +99,9 @@
       (ok (eql (active-neighbors test-world 31) 3)))))
 
 (deftest test-glider
-  (testing "Testing of glider pattern for first generation."
+  (testing "Testing of glider pattern for first and last generation."
     (let ((actual-world (make-array '(10 10) :element-type 'bit))
-	  (expected-world (make-array '(10 10) :element-type 'bit)))
+          (expected-world (make-array '(10 10) :element-type 'bit)))
       (set-world expected-world 10 1)
       (set-world expected-world 12 1)
       (set-world expected-world 21 1)
@@ -109,4 +109,12 @@
       (set-world expected-world 31 1)
       (init-glider-pattern actual-world)
       (game-of-life actual-world 1 0 nil)
+      (ok (world-equal actual-world expected-world))
+      (clear-world expected-world)
+      (set-world expected-world 88 1)
+      (set-world expected-world 89 1)
+      (set-world expected-world 98 1)
+      (set-world expected-world 99 1)
+      ; move glider to edge of flat 10x10 world where it terminates to a still block life
+      (game-of-life actual-world 30 0 nil)
       (ok (world-equal actual-world expected-world)))))
