@@ -12,7 +12,9 @@ This is a Common Lisp implementation of the infamous Conway's Game of Life probl
 The above function is how to start the GUI interface for initializing a blank x by x world with a custom pattern and updating at the speed y provided. 
 </p>
 
+<p align="center">
 ![Conway's Game of Life](https://github.com/xTriixrx/Conways-Game-of-Life/blob/main/imgs/game-of-life.gif)
+</p>
 
 ## Usage
 
