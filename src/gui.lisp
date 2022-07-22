@@ -2,7 +2,7 @@
   (:use :cl
         :ltk
         :cl-progress-bar)
-  (:export #:start #:square-p #:world-length #:access-world
+  (:export #:copy-array #:start #:square-p #:world-length #:access-world
      #:set-world #:copy-world-row #:insert-row #:row-equal
      #:insert-row #:world-equal #:print-world #:active-neighbors
      #:update-position #:update-world #:clear-world #:game-of-life
@@ -24,16 +24,18 @@
   (loop for i from 0 to (- (array-total-size world) 1)
         collect (apply #'create-rectangle canvas (grid-coords i length scale))))
 
-(defun draw-world (canvas grid world)
+(defun draw-world (canvas grid prev-world world)
   "Recolors the grid to reflect life values in each cell"
   (loop for i from 0 to (- (array-total-size world) 1)
-        do (itemconfigure canvas (nth i grid) :fill (if (zerop (row-major-aref world i)) 'white 'black))))
+        do (if (not (eql (row-major-aref world i) (row-major-aref prev-world i)))
+               (itemconfigure canvas (nth i grid) :fill (if (zerop (row-major-aref world i)) 'gray85 'black)))))
 
 (defun start (&key (function #'init-random-pattern) (dimension 20) (speed 4))
   "Creates a world and iterates through the progressions of generations using Ltk."
   (with-ltk ()
     (wm-title *tk* "Conway's Game of Life")
-    (let* ((draw-generation t)
+    (let* ((prev-world nil)
+           (draw-generation t)
            (display-size (screen-width-mm))
            (c (make-instance 'canvas :height display-size :width display-size))
            (world (make-array (list dimension dimension) :element-type 'bit))
@@ -51,7 +53,7 @@
             (lambda (evt) (declare (ignore evt))
               (setf draw-generation nil)
               (game-of-life world 1 0 nil nil)
-              (draw-world c grid world)))
+              (draw-world c grid prev-world world)))
       (pack c)
       (force-focus c)
       ;; Initializes the world based on the provided initaliation function
@@ -61,7 +63,8 @@
         (process-events)
         (if draw-generation
             (progn
+              (setf prev-world (copy-array world))
               (game-of-life world 1 0 nil nil)
-              (draw-world c grid world)))
+              (draw-world c grid prev-world world)))
         (sleep (/ 1 speed)))
       t)))
