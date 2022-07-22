@@ -47,6 +47,14 @@ After running the test-system function, you should have all unit tests pass. If 
 You should only have to manually install the packages once if the initial verification of the system does not work; once packages are installed your QuickLisp instance will maintain the dependencies.
 </p>
 
+<p align="center">
+To run the Ltk GUI use the aforementioned #'start function with the desired arguments; the start function starts with default values to test a basic random world. As the Ltk GUI is running, you can hit the following keys to perform specific actions with the world:
+</p>
+
+* p (Pause) - Will pause the progression of generations on the current generation. If you plan on pausing, it is suggested to keep sleep times higher as their is currently no way to "unwind" the progression.
+* s (Start) - Will start the progression of generations again starting on the currently paused generation.
+* n (Next) - If the progression is in motion, the next command will stop the progression and perform the next progression. If the progression has already stopped, the next progression is performed.
+
 ## Installation
 
 Below are the generic high level instructions for installing the appropriate Common Lisp environment as well as the necessary steps to run this application. Detailed commands for installing packages based on OS follows the generic instructions. 
@@ -118,16 +126,14 @@ More information will added once integration with Mac OS has been tested, please
 
 * Improve computational complexity
 * Improve GUI capabilities
+* Ability to "unwind" progression(s)
 * Add toroidal array support
 * Add HashLife support
 
 ### References
 
-<p align="center">
-    <a href="http://www.lispworks.com/documentation/HyperSpec/Front/index.htm">Common Lisp HyperSpec Documentation</a>
-    <a href="https://quickref.common-lisp.net/ltk.html">Ltk Reference Manual</a>
-    <a href="https://en.m.wikibooks.org/wiki/Common_Lisp/External_libraries/Ltk">Ltk Basic Examples</a>
-    <a href=""></a>
-    <a href=""></a>
-    <a href=""></a>
-</p>
+<a href="http://www.lispworks.com/documentation/HyperSpec/Front/index.htm">Common Lisp HyperSpec Documentation</a>
+
+<a href="https://quickref.common-lisp.net/ltk.html">Ltk Reference Manual</a>
+
+<a href="https://en.m.wikibooks.org/wiki/Common_Lisp/External_libraries/Ltk">Ltk Basic Examples</a>
