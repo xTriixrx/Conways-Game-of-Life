@@ -13,7 +13,7 @@ The above function is how to start the GUI interface for initializing a blank x 
 </p>
 
 <p align="center">
-![Conway's Game of Life](https://github.com/xTriixrx/Conways-Game-of-Life/blob/main/imgs/game-of-life.gif)
+    <img src="https://github.com/xTriixrx/Conways-Game-of-Life/blob/main/imgs/game-of-life.gif" alt="Conway's Game of Life"
 </p>
 
 ## Usage
