@@ -9,7 +9,7 @@ This is a Common Lisp implementation of the infamous Conway's Game of Life probl
 ```
 
 <p align="center">
-The above function is how to start the GUI interface for initializing a blank x by x world with a custom pattern and updating at the speed y provided. This library also supports REPL interactive command line operations and output if that is desired for testing. FOr a list of available functions, please review the defpackage macro for the available exported functions and for examples on how to implement initialiation functions as well as creating bit arrays.
+The above function is how to start the GUI interface for initializing a blank x by x world with a custom pattern and updating at the speed y provided. This library also supports REPL interactive command line operations and output if that is desired for testing. For a list of available functions, please review the defpackage macro for the available exported functions and for examples on how to implement initialiation functions as well as creating bit arrays.
 </p>
 
 <p align="center">
