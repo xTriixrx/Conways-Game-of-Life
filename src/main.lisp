@@ -1,7 +1,8 @@
 (defpackage conways-game-of-life
   (:use :cl
+        :ltk
         :cl-progress-bar)
-  (:export #:square-p #:world-length #:access-world
+  (:export #:start #:square-p #:world-length #:access-world
      #:set-world #:copy-world-row #:insert-row #:row-equal
      #:insert-row #:world-equal #:print-world #:active-neighbors
      #:update-position #:update-world #:clear-world #:game-of-life
@@ -170,18 +171,25 @@
         (set-world world pos 0))
       nil))
 
-(defun game-of-life (world &optional (max-generation 100) (sleep-time 0.2) (print-generation t))
+(defun game-of-life (world &optional (max-generation 100) (sleep-time 0.2) (print-generation t) (print-progress t))
   "Main game of life loop which will print out each generation and update to the next generation."
-  (setf cl-progress-bar:*progress-bar-enabled* t)
   (let ((length (world-length world)))
-    (cl-progress-bar:with-progress-bar
-        (max-generation "Performing Game of Life on ~ax~a world for ~a generations." length length max-generation)
-      (dotimes (generation max-generation)
-        (if print-generation
-            (print-world world))
-        (update-world world)
-        (sleep sleep-time)
-        (cl-progress-bar:update 1)))))
+    (labels ((operate-generations (world max-generation sleep-time print-generation)
+               (dotimes (generation max-generation)
+                 (if print-generation
+                     (print-world world))
+                 (update-world world)
+                 (sleep sleep-time))))
+      ;; Operate on the generations with the progress printing
+      (if print-progress
+          (progn
+            (setf cl-progress-bar:*progress-bar-enabled* t)
+            (cl-progress-bar:with-progress-bar
+                (max-generation "Performing Game of Life on ~ax~a world for ~a generations." length length max-generation)
+              (operate-generations world max-generation sleep-time print-generation)
+              (cl-progress-bar:update 1)))
+          ;; Operate on generations without printing the progress
+          (operate-generations world max-generation sleep-time print-generation)))))
 
 (defun init-glider-pattern (world)
   "A basic glider that is placed at the beginning of the world."

@@ -108,7 +108,7 @@
       (set-world expected-world 22 1)
       (set-world expected-world 31 1)
       (init-glider-pattern actual-world)
-      (game-of-life actual-world 1 0 nil)
+      (game-of-life actual-world 1 0 nil nil)
       (ok (world-equal actual-world expected-world))
       (clear-world expected-world)
       (set-world expected-world 88 1)
@@ -116,5 +116,5 @@
       (set-world expected-world 98 1)
       (set-world expected-world 99 1)
       ; move glider to edge of flat 10x10 world where it terminates to a still block life
-      (game-of-life actual-world 30 0 nil)
+      (game-of-life actual-world 30 0 nil nil)
       (ok (world-equal actual-world expected-world)))))

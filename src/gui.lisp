@@ -1,0 +1,67 @@
+(defpackage conways-game-of-life
+  (:use :cl
+        :ltk
+        :cl-progress-bar)
+  (:export #:start #:square-p #:world-length #:access-world
+     #:set-world #:copy-world-row #:insert-row #:row-equal
+     #:insert-row #:world-equal #:print-world #:active-neighbors
+     #:update-position #:update-world #:clear-world #:game-of-life
+     #:init-glider-pattern #:init-c-pattern #:init-random-pattern))
+(in-package :conways-game-of-life)
+
+(defun int-coords (index &optional (maxx 20))
+  "Returns 2-D coordinates given a linear coordinate"
+  (list (mod index maxx) (floor (/ index maxx))))
+
+(defun grid-coords (index &optional (maxx 20) (scale 25) &aux (coords (int-coords index maxx)))
+  "Returns screen coordinates given a linear coordinate"
+  (mapcar #'1+
+          (list (* (car coords) scale) (* (cadr coords) scale)
+                (* (1+ (car coords)) scale) (* (1+ (cadr coords)) scale))))
+
+(defun create-grid (canvas world length scale)
+  "Draws a new grid representing the world using rectangles on the screen"
+  (loop for i from 0 to (- (array-total-size world) 1)
+        collect (apply #'create-rectangle canvas (grid-coords i length scale))))
+
+(defun draw-world (canvas grid world)
+  "Recolors the grid to reflect life values in each cell"
+  (loop for i from 0 to (- (array-total-size world) 1)
+        do (itemconfigure canvas (nth i grid) :fill (if (zerop (row-major-aref world i)) 'white 'black))))
+
+(defun start (&key (function #'init-random-pattern) (dimension 20) (speed 4))
+  "Creates a world and iterates through the progressions of generations using Ltk."
+  (with-ltk ()
+    (wm-title *tk* "Conway's Game of Life")
+    (let* ((draw-generation t)
+           (display-size (screen-width-mm))
+           (c (make-instance 'canvas :height display-size :width display-size))
+           (world (make-array (list dimension dimension) :element-type 'bit))
+           (grid (create-grid c world dimension (/ display-size dimension))))
+      ;; Pause, will stop drawing progression of iterations
+      (bind c "<KeyPress-p>"
+            (lambda (evt) (declare (ignore evt))
+              (setf draw-generation nil)))
+      ;; Start, will start drawing progression of iterations
+      (bind c "<KeyPress-s>"
+            (lambda (evt) (declare (ignore evt))
+              (setf draw-generation t)))
+      ;; Next, will draw next iteration only
+      (bind c "<KeyPress-n>"
+            (lambda (evt) (declare (ignore evt))
+              (setf draw-generation nil)
+              (game-of-life world 1 0 nil nil)
+              (draw-world c grid world)))
+      (pack c)
+      (force-focus c)
+      ;; Initializes the world based on the provided initaliation function
+      (funcall function world)
+      (loop do
+        ;; process events and perform 1 generation of growth
+        (process-events)
+        (if draw-generation
+            (progn
+              (game-of-life world 1 0 nil nil)
+              (draw-world c grid world)))
+        (sleep (/ 1 speed)))
+      t)))

@@ -2,10 +2,11 @@
   :version "0.1.0"
   :author "Vincent Nigro"
   :license ""
-  :depends-on ("cl-progress-bar")
+  :depends-on ("ltk" "cl-progress-bar")
   :components ((:module "src"
                 :components
-                ((:file "main"))))
+                ((:file "gui")
+                 (:file "main"))))
   :description "Conway's Game of Life in POSIX Common Lisp"
   :in-order-to ((test-op (test-op "conways-game-of-life/tests"))))
 
