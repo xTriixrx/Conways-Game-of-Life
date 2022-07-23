@@ -34,12 +34,12 @@
   "Creates a world and iterates through the progressions of generations using Ltk."
   (with-ltk ()
     (wm-title *tk* "Conway's Game of Life")
-    (let* ((prev-world nil)
-           (draw-generation t)
+    (let* ((draw-generation t)
            (display-size (screen-width-mm))
            (c (make-instance 'canvas :height display-size :width display-size))
            (world (make-array (list dimension dimension) :element-type 'bit))
-           (grid (create-grid c world dimension (/ display-size dimension))))
+           (grid (create-grid c world dimension (/ display-size dimension)))
+           (prev-world (make-array (list dimension dimension) :element-type 'bit)))
       ;; Pause, will stop drawing progression of iterations
       (bind c "<KeyPress-p>"
             (lambda (evt) (declare (ignore evt))
@@ -58,6 +58,7 @@
       (force-focus c)
       ;; Initializes the world based on the provided initaliation function
       (funcall function world)
+      (draw-world c grid prev-world world)
       (loop do
         ;; process events and perform 1 generation of growth
         (process-events)
