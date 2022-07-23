@@ -52,6 +52,7 @@
       (bind c "<KeyPress-n>"
             (lambda (evt) (declare (ignore evt))
               (setf draw-generation nil)
+              (setf prev-world (copy-array world))
               (game-of-life world 1 0 nil nil)
               (draw-world c grid prev-world world)))
       (pack c)
