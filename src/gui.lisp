@@ -33,40 +33,44 @@
 (defun start (&key (function #'init-random-pattern) (dimension 20) (speed 4))
   "Creates a world and iterates through the progressions of generations using Ltk."
   (with-ltk ()
-    (wm-title *tk* "Conway's Game of Life")
-    (let* ((draw-generation t)
+    (let* ((title nil)
+           (draw-generation t)
+           (generation-count 1)
            (display-size (screen-width-mm))
            (c (make-instance 'canvas :height display-size :width display-size))
            (world (make-array (list dimension dimension) :element-type 'bit))
            (grid (create-grid c world dimension (/ display-size dimension)))
            (prev-world (make-array (list dimension dimension) :element-type 'bit)))
-      ;; Pause, will stop drawing progression of iterations
-      (bind c "<KeyPress-p>"
-            (lambda (evt) (declare (ignore evt))
-              (setf draw-generation nil)))
-      ;; Start, will start drawing progression of iterations
-      (bind c "<KeyPress-s>"
-            (lambda (evt) (declare (ignore evt))
-              (setf draw-generation t)))
-      ;; Next, will draw next iteration only
-      (bind c "<KeyPress-n>"
-            (lambda (evt) (declare (ignore evt))
-              (setf draw-generation nil)
-              (setf prev-world (copy-array world))
-              (game-of-life world 1 0 nil nil)
-              (draw-world c grid prev-world world)))
-      (pack c)
-      (force-focus c)
-      ;; Initializes the world based on the provided initaliation function
-      (funcall function world)
-      (draw-world c grid prev-world world)
-      (loop do
-        ;; process events and perform 1 generation of growth
-        (process-events)
-        (if draw-generation
-            (progn
-              (setf prev-world (copy-array world))
-              (game-of-life world 1 0 nil nil)
-              (draw-world c grid prev-world world)))
-        (sleep (/ 1 speed)))
+      (labels ((perform-generation ()
+                 (incf generation-count)
+                 (setf title (format nil "Conways's Game of Life Generation ~a" generation-count))
+                 (wm-title *tk* title)
+                 (setf prev-world (copy-array world))
+                 (game-of-life world 1 0 nil nil)
+                 (draw-world c grid prev-world world)))
+        ;; Pause, will stop drawing progression of iterations
+        (bind c "<KeyPress-p>"
+              (lambda (evt) (declare (ignore evt))
+                (setf draw-generation nil)))
+        ;; Start, will start drawing progression of iterations
+        (bind c "<KeyPress-s>"
+              (lambda (evt) (declare (ignore evt))
+                (setf draw-generation t)))
+        (bind c "<KeyPress-n>"
+              (lambda (evt) (declare (ignore evt))
+                (setf draw-generation nil)
+                (perform-generation)))
+        (setf title "Conway's Game of Life Generation 1")
+        (pack c)
+        (force-focus c)
+        ;; Initializes the world based on the provided initaliation function
+        (funcall function world)
+        (wm-title *tk* title)
+        (draw-world c grid prev-world world)
+        (loop do
+          ;; process events and perform 1 generation of growth
+          (process-events)
+          (if draw-generation
+              (perform-generation))
+          (sleep (/ 1 speed))))
       t)))
