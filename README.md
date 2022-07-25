@@ -39,6 +39,7 @@ After running the test-system function, you should have all unit tests pass. If 
 
 ```Lisp
 (ql:quickload :ltk)
+(ql:quickload :rove)
 (ql:quickload :prove)
 (ql:quickload :cl-progress-bar)
 ```
@@ -72,7 +73,7 @@ For SBCL, add the following to the bottom of your ~/.sbclrc file to create a loc
 </p>
 
 ```Lisp
-(push "~/Path/To/Local/CL-Projects: ql:*local-project-directories*)
+(push "~/Path/To/Local/CL-Projects" ql:*local-project-directories*)
 ```
 
 ### Linux
@@ -89,7 +90,7 @@ is a good reference to get started by installing sbcl, QuickLisp, and SLIME.
 sudo apt install tcl
 sudo apt install tk
 git clone https://github.com/xTriixrx/Conways-Game-of-Life.git
-echo '(push "~/Path/To/Local/CL-Projects: ql:\*local-project-directories\*)' >> ~/.sbclrc
+echo '(push "~/Path/To/Local/CL-Projects" ql:*local-project-directories*)' >> ~/.sbclrc
 ```
 
 ### Arch-Based Distros
@@ -98,7 +99,7 @@ echo '(push "~/Path/To/Local/CL-Projects: ql:\*local-project-directories\*)' >> 
 sudo pacman -S tcl
 sudo pacman -S tk
 git clone https://github.com/xTriixrx/Conways-Game-of-Life.git
-echo '(push "~/Path/To/Local/CL-Projects: ql:\*local-project-directories\*)' >> ~/.sbclrc
+echo '(push "~/Path/To/Local/CL-Projects" ql:*local-project-directories*)' >> ~/.sbclrc
 ```
 
 ### Fedora-Based Distros
@@ -107,14 +108,23 @@ echo '(push "~/Path/To/Local/CL-Projects: ql:\*local-project-directories\*)' >> 
 sudo yum install tcl
 sudo yum install tk
 git clone https://github.com/xTriixrx/Conways-Game-of-Life.git
-echo '(push "~/Path/To/Local/CL-Projects: ql:\*local-project-directories\*)' >> ~/.sbclrc
+echo '(push "~/Path/To/Local/CL-Projects" ql:*local-project-directories*)' >> ~/.sbclrc
 ```
 
 ### Windows
 
 <p align="center">
 More information will added once integration with Windows 10/11 has been tested. Integration instructions will be provided for both WSL 2.0 as well as standard Windows support.
+
+### WSL 2.0
+
+<p align="center">
+Have WSL 2.0 installed and follow the Linux instructions above that is closest to your WSL 2.0 distribution. If you have issues with producing the GUI in relation to the DISPLAY property, you may have to set the following:
 </p>
+
+``` Bash
+export DISPLAY=:0
+```
 
 ### Mac OS
 
