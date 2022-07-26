@@ -28,16 +28,17 @@ arguments."
     new-array))
 
 (defun square-p (world)
-  "Predicate for determining if array is square"
+  "Predicate for determining if flat 1D array is square"
   (if (arrayp world)
-      (let ((dimensions (array-dimensions world)))
-        (and (eql (length dimensions) 2)
-             (eql (car dimensions) (cadr dimensions))))
+      (let* ((size (car (array-dimensions world)))
+             (dimension (floor (sqrt size)))
+             (calc-size (* dimension dimension)))
+        (eql size calc-size))
       nil))
 
 (defun world-length (world)
   "Returns the length of the world if it is square, otherwise returns nil"
-  (if (square-p world) (car (array-dimensions world)) nil))
+  (if (square-p world) (floor (sqrt (car (array-dimensions world)))) nil))
 
 (defun access-world (world pos)
   "Safe access world using row-major-aref for single position, returns nil if out of bounds"
@@ -55,7 +56,7 @@ arguments."
   "Copies a row within the world and returns it as a new array."
   (if (square-p world)
     (let* ((length (world-length world))
-           (row (make-array length)))
+           (row (make-array length :element-type 'bit)))
       (dotimes (i length)
         (setf (aref row i) (access-world world (+ i (* row-delta length)))))
       row)
@@ -154,8 +155,8 @@ arguments."
   "Updates world by looping through each position and updating a line buffer accordingly."
   (let* ((length (world-length world))
          (end-of-row (- length 1))
-         (lbuffer1 (make-array length))
-         (lbuffer2 (make-array length)))
+         (lbuffer1 (make-array length :element-type 'bit))
+         (lbuffer2 (make-array length :element-type 'bit)))
     ; Create a local function binding to insert a buffer into a row of the provided world.
     (labels
         ((insert-and-clear (world buffer delta)
@@ -211,22 +212,32 @@ arguments."
 
 (defun init-glider-pattern (world)
   "A basic glider that is placed at the beginning of the world."
-  (setf (aref world 0 1) 1)
-  (setf (aref world 1 2) 1)
-  (setf (aref world 2 2) 1)
-  (setf (aref world 2 1) 1)
-  (setf (aref world 2 0) 1) t)
+  (let ((size (world-length world)))
+    (if size
+        (progn
+          (setf (aref world 1) 1)
+          (setf (aref world (+ 2 (* 1 size))) 1)
+          (setf (aref world (+ 2 (* 2 size))) 1)
+          (setf (aref world (+ 1 (* 2 size))) 1)
+          (setf (aref world (* 2 size)) 1)
+          t)
+        nil)))
 
 (defun init-c-pattern (world)
   "A basic c shape that becomes an oscillator. World should be 20x20 at a minimum."
-  (let ((size (/ (world-length world) 2)))
-    (setf (aref world (- size 2) size) 1)
-    (setf (aref world (+ size 2) size) 1)
-    (setf (aref world (- size 2) (- size 2)) 1)
-    (setf (aref world (+ size 2) (- size 2)) 1)
-    (setf (aref world (- size 1) (- size 3)) 1)
-    (setf (aref world (+ size 1) (- size 3)) 1)
-    (setf (aref world size (- size 4)) 1) t))
+  (let* ((size (world-length world))
+        (delta (/ size 2)))
+    (if (and size (>= size 20))
+        (progn
+          (setf (aref world (+ delta (* size (- delta 2)))) 1)
+          (setf (aref world (+ delta (* size (+ delta 2)))) 1)
+          (setf (aref world (+ (- delta 2) (* size (- delta 2)))) 1)
+          (setf (aref world (+ (- delta 2) (* size (+ delta 2)))) 1)
+          (setf (aref world (+ (- delta 3) (* size (- delta 1)))) 1)
+          (setf (aref world (+ (- delta 3) (* size (+ delta 1)))) 1)
+          (setf (aref world (+ (- delta 4) (* size delta))) 1)
+          t)
+        nil)))
 
 (defun init-random-pattern (world &optional (coverage-percentage 0.6))
   "Initializes a square world with some random pattern."
@@ -237,15 +248,10 @@ arguments."
           (dotimes (i marks)
             (let ((x (random length))
                   (y (random length)))
-              (setf (aref world x y) 1)))
+              (setf (aref world (+ y (* x length))) 1)))
           t)
         nil)))
 
 ; http://large.stanford.edu/diversions/life/rules/
 ; https://en.wikipedia.org/wiki/Conway's_Game_of_Life
 ; https://www.jagregory.com/abrash-black-book/#chapter-17-the-game-of-life
-;(defvar test-world (make-array '(20 20)))
-;(init-pos-2 test-world)
-;(print-world test-world)
-;(game-of-life test-world 20 1)
-;(clear-world test-world)

@@ -9,48 +9,54 @@
 (deftest test-square-p
   (testing "Testing square-p predicate function."
     (let ((nil-world nil)
-          (flat-world (make-array '10 :element-type 'bit))
-          (valid-world (make-array '(10 10) :element-type 'bit))
-          (invalid-world (make-array '(10 2) :element-type 'bit)))
+          (valid-flat-world (make-array 100 :element-type 'bit))
+          (invalid-world (make-array '(10 2) :element-type 'bit))
+          (invalid-flat-world (make-array '10 :element-type 'bit))
+          (invalid-square-world (make-array '(10 10) :element-type 'bit)))
       (ng (square-p nil-world))
-      (ng (square-p flat-world))
-      (ok (square-p valid-world))
-      (ng (square-p invalid-world)))))
+      (ng (square-p invalid-world))
+      (ng (square-p invalid-flat-world))
+      (ng (square-p invalid-square-world))
+      (ok (square-p valid-flat-world)))))
 
-(deftest test-world-length
+deftest test-world-length
   (testing "Testing world length function"
     (let ((nil-world nil)
-          (flat-world (make-array 10 :element-type 'bit))
-          (valid-world (make-array '(10 10) :element-type 'bit))
-          (invalid-world (make-array '(10 2) :element-type 'bit)))
-      (ok (eql (world-length nil-world) nil))
-      (ok (eql (world-length flat-world) nil))
-      (ok (eql (world-length valid-world) 10))
-      (ok (eql (world-length invalid-world) nil)))))
+          (valid-flat-world (make-array 100 :element-type 'bit))
+          (invalid-world (make-array '(10 2) :element-type 'bit))
+          (invalid-flat-world (make-array 10 :element-type 'bit))
+          (invalid-square-world (make-array '(10 10) :element-type 'bit)))
+      (ng (world-length nil-world))
+      (ng (world-length invalid-world))
+      (ng (world-length invalid-flat-world))
+      (ng (world-length invalid-square-world))
+      (ok (eql (world-length valid-flat-world) 10)))))
 
 (deftest test-copy-world-row
   (testing "Testing copy-world-row function"
     (let ((nil-world nil)
-          (flat-world (make-array 10 :element-type 'bit))
           (expected-row (make-array 10 :element-type 'bit))
-          (valid-world (make-array '(10 10) :element-type 'bit))
-          (invalid-world (make-array '(10 2) :element-type 'bit)))
+          (valid-flat-world (make-array 100 :element-type 'bit))
+          (invalid-world (make-array '(10 2) :element-type 'bit))
+          (invalid-flat-world (make-array 10 :element-type 'bit))
+          (invalid-square-world (make-array '(10 10) :element-type 'bit)))
       ; Set up valid-world to have x number of active cells for x rows
       (dotimes (i 10)
         (dotimes (j 10)
           (if (<= j i)
-              (set-world valid-world (+ j (* i 10)) 1))))
-      (ok (eql (copy-world-row nil-world) nil))
-      (ok (eql (copy-world-row flat-world) nil))
-      (ok (eql (copy-world-row invalid-world) nil))
+              (set-world valid-flat-world (+ j (* i 10)) 1))))
+      (ng (copy-world-row nil-world))
+      (ng (copy-world-row invalid-world))
+      (ng (copy-world-row invalid-flat-world))
+      (ng (copy-world-row invalid-square-world))
       (dotimes (i 10)
-        (setf expected-row (copy-world-row valid-world i))
-        (ok (row-equal valid-world expected-row i))))))
+        (setf expected-row (copy-world-row valid-flat-world i))
+        (ok (row-equal valid-flat-world expected-row i))))))
 
 (deftest test-insert-row
   (testing "Testing insert-row function"
     (let ((row (make-array 10 :element-type 'bit))
-          (world (make-array '(10 10) :element-type 'bit)))
+          (world (make-array 100 :element-type 'bit)))
       (dotimes (i 10)
         (setf (aref row i) 1))
       (insert-row world row 0)
@@ -61,14 +67,14 @@
 (deftest test-world-equal
   (testing "Testing world equal function"
     (let ((nil-world nil)
-          (flat-world (make-array 10 :element-type 'bit))
-          (valid-world (make-array '(10 10) :element-type 'bit))
-          (valid-world2 (make-array '(10 10) :element-type 'bit))
+          (valid-world (make-array 100 :element-type 'bit))
+          (valid-world2 (make-array 100 :element-type 'bit))
+          (invalid-flat-world (make-array 10 :element-type 'bit))
           (invalid-world (make-array '(10 2) :element-type 'bit)))
       (init-glider-pattern valid-world)
       (init-glider-pattern valid-world2)
-      (ng (world-equal nil-world flat-world))
-      (ng (world-equal flat-world nil-world))
+      (ng (world-equal nil-world invalid-flat-world))
+      (ng (world-equal invalid-flat-world nil-world))
       (ok (world-equal valid-world valid-world2))
       (ng (world-equal invalid-world valid-world))
       (ng (world-equal valid-world invalid-world)))))
@@ -77,7 +83,7 @@
   (testing "Testing access world function"
     (let ((nil-world nil)
           (flat-world (make-array 10 :element-type 'bit))
-          (valid-world (make-array '(10 10) :element-type 'bit))
+          (valid-world (make-array 100 :element-type 'bit))
           (invalid-world (make-array '(10 2) :element-type 'bit)))
       (set-world valid-world 0 1)
       (ng (access-world nil-world 0))
@@ -89,7 +95,7 @@
 
 (deftest test-neighbors
   (testing "Testing the computation of determining active neighbor cells"
-    (let ((test-world (make-array '(10 10) :element-type 'bit)))
+    (let ((test-world (make-array 100 :element-type 'bit)))
       (init-glider-pattern test-world)
       (ok (eql (active-neighbors test-world 0) 1))
       (ok (eql (active-neighbors test-world 1) 1))
@@ -100,8 +106,8 @@
 
 (deftest test-glider
   (testing "Testing of glider pattern for first and last generation."
-    (let ((actual-world (make-array '(10 10) :element-type 'bit))
-          (expected-world (make-array '(10 10) :element-type 'bit)))
+    (let ((actual-world (make-array 100 :element-type 'bit))
+          (expected-world (make-array 100 :element-type 'bit)))
       (set-world expected-world 10 1)
       (set-world expected-world 12 1)
       (set-world expected-world 21 1)
