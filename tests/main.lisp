@@ -19,7 +19,7 @@
       (ng (square-p invalid-square-world))
       (ok (square-p valid-flat-world)))))
 
-deftest test-world-length
+(deftest test-world-length
   (testing "Testing world length function"
     (let ((nil-world nil)
           (valid-flat-world (make-array 100 :element-type 'bit))
