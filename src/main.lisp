@@ -47,10 +47,7 @@ arguments."
 
 (defun set-world (world pos val)
   "Safe setting access to world, return nil if not set and t if set."
-  (if (and (not (eql (access-world world pos) nil)) (or (eql val 1) (eql val 0)))
-      (progn
-        (setf (row-major-aref world pos) val) t)
-      nil))
+  (setf (row-major-aref world pos) val) t)
 
 (defun copy-world-row (world &optional (row-delta 0))
   "Copies a row within the world and returns it as a new array."
@@ -255,3 +252,4 @@ arguments."
 ; http://large.stanford.edu/diversions/life/rules/
 ; https://en.wikipedia.org/wiki/Conway's_Game_of_Life
 ; https://www.jagregory.com/abrash-black-book/#chapter-17-the-game-of-life
+; https://stackoverflow.com/questions/30552102/optimizing-neighbor-count-function-for-conways-game-of-life-in-c
