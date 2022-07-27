@@ -24,6 +24,11 @@
   (loop for i from 0 to (- (array-total-size world) 1)
         collect (apply #'create-rectangle canvas (grid-coords i length scale))))
 
+(defun draw-clean-world (canvas grid world)
+  (dotimes (i (array-total-size world))
+    (if (not (zerop (row-major-aref world i)))
+        (itemconfigure canvas (nth i grid) :fill 'black))))
+
 (defun draw-world (canvas grid prev-world world)
   "Recolors the grid to reflect life values in each cell"
   (loop for i from 0 to (- (array-total-size world) 1)
@@ -66,7 +71,7 @@
         ;; Initializes the world based on the provided initaliation function
         (funcall function world)
         (wm-title *tk* title)
-        (draw-world c grid prev-world world)
+        (draw-clean-world c grid world)
         (loop do
           ;; process events and perform 1 generation of growth
           (process-events)

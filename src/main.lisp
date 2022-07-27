@@ -43,7 +43,7 @@ arguments."
 (defun access-world (world pos)
   "Safe access world using row-major-aref for single position, returns nil if out of bounds"
   (if (and (square-p world) (>= pos 0) (< pos (array-total-size world)))
-      (row-major-aref world pos) nil))
+      (row-major-aref world pos) 0))
 
 (defun set-world (world pos val)
   "Safe setting access to world, return nil if not set and t if set."

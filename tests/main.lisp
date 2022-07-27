@@ -86,11 +86,11 @@
           (valid-world (make-array 100 :element-type 'bit))
           (invalid-world (make-array '(10 2) :element-type 'bit)))
       (set-world valid-world 0 1)
-      (ng (access-world nil-world 0))
-      (ng (access-world flat-world 0))
-      (ng (access-world valid-world -1))
-      (ng (access-world invalid-world 0))
-      (ng (access-world valid-world 100))
+      (ok (eql (access-world nil-world 0) 0))
+      (ok (eql (access-world flat-world 0) 0))
+      (ok (eql (access-world valid-world -1) 0))
+      (ok (eql (access-world invalid-world 0) 0))
+      (ok (eql (access-world valid-world 100) 0))
       (ok (eql (access-world valid-world 0) 1)))))
 
 (deftest test-neighbors
