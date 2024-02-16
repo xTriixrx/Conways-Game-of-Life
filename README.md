@@ -23,7 +23,7 @@ Below is a .gif screen recording of the provided GUI interface progressing throu
 ## Usage
 
 <p align="center">
-After installation of the package, you can load and verify the system with the following:
+The below usage assumes that QuickLisps has already been installed and configured for your Lisp of choice (sbcl is recommended). After installation of the TCL/TK packages & initial configuration of the project, you can load and verify the system with the following:
 </p>
 
 ```Lisp
@@ -34,7 +34,7 @@ After installation of the package, you can load and verify the system with the f
 ```
 
 <p align="center">
-After running the test-system function, you should have all unit tests pass. If they fail, you may need to manually install the necessary packages to your QuickLisp environment with the following:
+You will need to ensure that the below packages have been installed prior to running tests and the core application:
 </p>
 
 ```Lisp
@@ -129,8 +129,14 @@ export DISPLAY=:0
 ### Mac OS
 
 <p align="center">
-More information will added once integration with Mac OS has been tested, please note that integration with Apple Silicon Macs may be incompatible due to the tcl/tk requirements.
+The following should work for both Intel based Mac's as well as Apple Silicon based Mac's.
 </p>
+
+```Bash
+brew install tcl-tk
+git clone https://github.com/xTriixrx/Conways-Game-of-Life.git
+echo '(push "~/Path/To/Local/CL-Projects" ql:*local-project-directories*)' >> ~/.sbclrc
+```
 
 ## Future Updates
 
