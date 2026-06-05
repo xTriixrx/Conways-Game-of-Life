@@ -124,3 +124,45 @@
       ; move glider to edge of flat 10x10 world where it terminates to a still block life
       (game-of-life actual-world 30 0 nil nil)
       (ok (world-equal actual-world expected-world)))))
+
+(deftest test-game-state-updates
+  (testing "Testing renderer-neutral game state updates."
+    (let ((state (create-game-state :function #'init-glider-pattern
+                                    :dimension 10
+                                    :history-limit 10)))
+      (let ((update (advance-game-state state)))
+        (ok (eql (generation-update-generation update) 2))
+        (ok (eql (generation-update-live-count update) 5))
+        (ok (eql (length (generation-update-changed-cells update)) 4))
+        (ok (eql (generation-update-direction update) :forward)))
+      (let ((update (previous-game-state state)))
+        (ok (eql (generation-update-generation update) 1))
+        (ok (eql (generation-update-live-count update) 5))
+        (ok (eql (length (generation-update-changed-cells update)) 4))
+        (ok (eql (generation-update-direction update) :backward))))))
+
+(deftest test-pi-heptomino-pattern
+  (testing "Testing centered pi-heptomino pattern initialization."
+    (let ((actual-world (make-array 100 :element-type 'bit))
+          (expected-world (make-array 100 :element-type 'bit)))
+      (dolist (pos '(44 46 54 56 64 65 66))
+        (set-world expected-world pos 1))
+      (init-pi-heptomino-pattern actual-world)
+      (ok (world-equal actual-world expected-world)))))
+
+(deftest test-pentadecathlon-on-snacker-pattern
+  (testing "Testing centered pentadecathlon-on-snacker pattern initialization."
+    (let ((actual-world (make-array 900 :element-type 'bit))
+          (expected-world (make-array 900 :element-type 'bit)))
+      (dolist (pos '(191 196 219 220 222 223 224 225 227 228
+                     251 256 365 366 383 384 396 413 426 428
+                     441 443 457 458 471 472 492 497 520 521
+                     523 524 525 526 528 529 552 557 577 578
+                     591 592 606 608 621 623 636 653 665 666
+                     683 684))
+        (set-world expected-world pos 1))
+      (init-pentadecathlon-on-snacker-pattern actual-world)
+      (ok (world-equal actual-world expected-world))
+      (ok (eql (loop for pos below (array-total-size actual-world)
+                     count (eql (aref actual-world pos) 1))
+               52)))))

@@ -2,11 +2,16 @@
   :version "0.1.0"
   :author "Vincent Nigro"
   :license ""
-  :depends-on ("ltk" "cl-progress-bar")
+  :depends-on ("ltk" "cl-progress-bar" "bordeaux-threads" "sb-bsd-sockets"
+               "websocket-driver")
   :components ((:module "src"
                 :components
-                ((:file "gui")
-                 (:file "main"))))
+                ((:file "render-api")
+                 (:file "core")
+                 (:file "patterns")
+                 (:file "web-protocol")
+                 (:file "web-ui")
+                 (:file "tk-ui"))))
   :description "Conway's Game of Life in POSIX Common Lisp"
   :in-order-to ((test-op (test-op "conways-game-of-life/tests"))))
 

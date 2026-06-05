@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Conway's Game of Life</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>Conway's Game of Life</h1>
+        <p id="status">Connecting...</p>
+      </div>
+      <nav>
+        <button id="play-button" data-action="resume">Play</button>
+        <button data-action="pause">Pause</button>
+        <button data-action="next">Next</button>
+        <button id="back-button" data-action="previous">Back</button>
+        <button id="reset-view-button">Reset View</button>
+      </nav>
+    </header>
+    <section id="viewport">
+      <canvas id="world"></canvas>
+      <canvas id="grid"></canvas>
+    </section>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>
